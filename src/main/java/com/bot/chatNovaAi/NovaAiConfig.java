@@ -1,51 +1,57 @@
-package com.bot.chatNovaAi.model;
+package com.bot.chatNovaAi.config;
 
 import org.deeplearning4j.nn.conf.MultiLayerConfiguration;
 import org.deeplearning4j.nn.conf.NeuralNetConfiguration;
-import org.deeplearning4j.nn.conf.layers.LSTM;
+import org.deeplearning4j.nn.conf.layers.AttentionLayer;
+import org.deeplearning4j.nn.conf.layers.Layer;
 import org.deeplearning4j.nn.conf.layers.OutputLayer;
-import org.deeplearning4j.nn.conf.layers.Dropout;
+import org.deeplearning4j.nn.conf.layers.FeedForwardLayer;
 import org.nd4j.linalg.activations.Activation;
 import org.nd4j.linalg.learning.config.Adam;
 
 public class NovaAiConfig {
 
-    private static final int embeddingSize = 100; // Adjust based on your embeddings
-    private static final int hiddenLayerSize = 256; // Size of LSTM layers
-    private static final int vocabularySize = 10000; // Size of your vocabulary
+    public static MultiLayerConfiguration createModelConfiguration(int inputSize, int vocabSize) {
+        int numLayers = 6; // Number of transformer layers
+        int numHeads = 8;  // Number of attention heads
+        int dModel = 512;  // Dimensionality of the model
+        int dff = 2048;    // Dimensionality of the feed-forward network
+        double dropoutRate = 0.1; // Dropout rate
 
-    public static MultiLayerConfiguration createModelConfiguration() {
-        return new NeuralNetConfiguration.Builder()
-                .updater(new Adam(0.001))
-                .list()
-                .layer(0, new LSTM.Builder()
-                        .nIn(embeddingSize)
-                        .nOut(hiddenLayerSize)
-                        .activation(Activation.TANH)
-                        .build())
-                .layer(1, new Dropout(0.5)) // Dropout layer
-                .layer(2, new LSTM.Builder()
-                        .nIn(hiddenLayerSize)
-                        .nOut(hiddenLayerSize)
-                        .activation(Activation.TANH)
-                        .build())
-                .layer(3, new Dropout(0.5)) // Another dropout layer
-                .layer(4, new LSTM.Builder()
-                        .nIn(hiddenLayerSize)
-                        .nOut(hiddenLayerSize)
-                        .activation(Activation.TANH)
-                        .build())
-                .layer(5, new Dropout(0.5)) // Dropout layer
-                .layer(6, new LSTM.Builder()
-                        .nIn(hiddenLayerSize)
-                        .nOut(hiddenLayerSize)
-                        .activation(Activation.TANH)
-                        .build())
-                .layer(7, new OutputLayer.Builder()
-                        .nIn(hiddenLayerSize)
-                        .nOut(vocabularySize)
-                        .activation(Activation.SOFTMAX)
-                        .build())
+        // Build the model configuration
+        MultiLayerConfiguration configuration = new NeuralNetConfiguration.Builder()
+                .seed(42) // For reproducibility
+                .updater(new Adam(0.001)) // Learning rate
+                .list();
+
+        for (int i = 0; i < numLayers; i++) {
+            // Add transformer block with attention and feed-forward layers
+            configuration.layer(i, new AttentionLayer.Builder()
+                    .nIn(dModel)
+                    .nOut(dModel)
+                    .numHeads(numHeads)
+                    .dropOut(dropoutRate)
+                    .activation(Activation.RELU)
+                    .build());
+            configuration.layer(i + numLayers, new FeedForwardLayer.Builder()
+                    .nIn(dModel)
+                    .nOut(dff)
+                    .activation(Activation.RELU)
+                    .dropOut(dropoutRate)
+                    .build());
+        }
+
+        // Add output layer
+        configuration.layer(numLayers * 2, new OutputLayer.Builder()
+                .nIn(dff)
+                .nOut(vocabSize) // Number of unique tokens/words
+                .activation(Activation.SOFTMAX) // For classification
+                .build());
+
+        configuration.pretrain(false) // Disable pretraining
+                .backprop(true) // Enable backpropagation
                 .build();
+
+        return configuration;
     }
 }
