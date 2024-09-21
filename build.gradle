@@ -1,0 +1,28 @@
+plugins {
+    id 'java'
+    id 'application'
+}
+
+group 'com.bot.chatNovaAi' // Replace with your package name
+version '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation 'org.deeplearning4j:deeplearning4j-core:1.0.0-M1' // Check for the latest version
+    implementation 'org.nd4j:nd4j-native-platform:1.0.0-M1' // Check for the latest version
+    implementation 'org.deeplearning4j:samediff:1.0.0-M1' // Check for the latest version
+    implementation 'org.datavec:datavec-api:1.0.0-M1' // Check for the latest version
+    implementation 'org.nd4j:libnd4j:1.0.0-M1' // Check for the latest version
+    implementation 'org.python:python4j:0.8.0' // Check for the latest version
+
+    testImplementation 'junit:junit:4.12' // For unit testing
+}
+
+mainClassName = 'com.bot.chatNovaAi.Main' // Replace with your main class path
+
+test {
+    useJUnitPlatform()
+}
