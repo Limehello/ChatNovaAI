@@ -3,7 +3,7 @@ plugins {
     id 'application'
 }
 
-group 'com.bot.chatNovaAi' // Replace with your package name
+group 'com.bot.chatNovaAi'
 version '1.0-SNAPSHOT'
 
 repositories {
@@ -21,7 +21,15 @@ dependencies {
     testImplementation 'junit:junit:4.12' // For unit testing
 }
 
-mainClassName = 'com.bot.chatNovaAi.Main' // Replace with your main class path
+sourceSets {
+    main {
+        java {
+            srcDirs = ['src-test/main/java'] // Adjust the main source directory
+        }
+    }
+}
+
+mainClassName = 'com.bot.chatNovaAi.Main'
 
 test {
     useJUnitPlatform()
