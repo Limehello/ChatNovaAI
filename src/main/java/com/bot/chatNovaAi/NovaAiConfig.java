@@ -8,7 +8,7 @@ import org.deeplearning4j.nn.conf.layers.Dropout;
 import org.nd4j.linalg.activations.Activation;
 import org.nd4j.linalg.learning.config.Adam;
 
-public class NovaAi {
+public class NovaAiConfig {
 
     private static final int embeddingSize = 100; // Adjust based on your embeddings
     private static final int hiddenLayerSize = 256; // Size of LSTM layers
